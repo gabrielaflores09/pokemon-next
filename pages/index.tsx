@@ -1,12 +1,13 @@
 // External deps
 import { NextPage, GetStaticProps } from "next";
 import { Grid } from "@nextui-org/react";
-
 // Internal deps
 import { Layout } from "../components/layouts";
 import { PokemonListResponse, SmallPokemon } from "../interfaces";
 import { pokeApi } from "../api";
 import { PokemonCard } from "../components/pokemon";
+import Image from "next/image";
+import banner from '../public/img/banner.png';
 
 interface HomePageProps {
   pokemons: SmallPokemon[];

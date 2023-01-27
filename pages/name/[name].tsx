@@ -1,41 +1,17 @@
-import { useState } from "react";
 import { NextPage, GetStaticPaths, GetStaticProps } from "next";
-import { Grid, Card, Text, Button, Image, Row } from "@nextui-org/react";
-
-import confetti from 'canvas-confetti';
+import { Grid, Card, Text, Image, Row } from "@nextui-org/react";
 
 import { pokeApi } from "../../api";
 import { Layout } from "../../components/layouts";
-import { Pokemon } from "../../interfaces";
-import { getPokemonInfo, localFavorites } from "../../utils";
+import { Pokemon, PokemonListResponse } from "../../interfaces";
+import { getPokemonInfo } from "../../utils";
 
-
-interface PokemonPageProps {
+interface PokemonByNameProps {
   pokemon: Pokemon;
 }
-const PokemonPage: NextPage<PokemonPageProps> = ({
+const PokemonByName: NextPage<PokemonByNameProps> = ({
   pokemon,
-}: PokemonPageProps) => {
-  const [isInFavorites, setIsInFavorites] = useState(localFavorites.existInFavorites(pokemon.id));
-
-  const onToggleFavorite = () => {
-    localFavorites.toggleFavorite(pokemon.id)
-    setIsInFavorites((oldValue) => !oldValue)
-
-    if (isInFavorites) return;
-
-    confetti({
-      zIndex: 999,
-      particleCount: 100,
-      spread: 160,
-      angle: -100,
-      origin: {
-        x: 1,
-        y: 0
-      }
-    })
-
-  }
+}: PokemonByNameProps) => {
   return (
     <Layout title={pokemon.name}>
       <Grid.Container css={{ marginTop: "5px" }} gap={2}>
@@ -61,9 +37,6 @@ const PokemonPage: NextPage<PokemonPageProps> = ({
               <Text h1 transform="capitalize">
                 {pokemon.name}
               </Text>
-              <Button color="gradient" ghost={!isInFavorites} onPress={onToggleFavorite}>
-                {isInFavorites ? 'En favoritos' : 'Guardar en favoritos'}
-              </Button>
             </Card.Header>
             <Card.Body>
               <Text size={30}>Sprites:</Text>
@@ -93,28 +66,32 @@ const PokemonPage: NextPage<PokemonPageProps> = ({
           </Card>
         </Grid>
       </Grid.Container>
+      <Grid.Container>
+        <pre>
+          {JSON.stringify(pokemon, null, 2)}
+        </pre>
+      </Grid.Container>
     </Layout>
   );
 };
 
 export const getStaticPaths: GetStaticPaths = async (ctx) => {
-  const pokemon100 = [...Array(100)].map((_, index) => `${index + 1}`);
-
+  const pokemon151: PokemonListResponse = await pokeApi('/pokemon/?limit=151');
   return {
-    paths: pokemon100.map((id) => ({
-      params: { id },
+    paths: pokemon151.results.map((pokemon) => ({
+      params: { name: pokemon.name },
     })),
     fallback: false, // can also be true or 'blocking'
   };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const { id } = params as { id: string };
+  const { name } = params as { name: string };
   return {
     props: {
-      pokemon: await getPokemonInfo(id)
+      pokemon: await getPokemonInfo(name)
     },
   };
 };
 
-export default PokemonPage;
+export default PokemonByName;
