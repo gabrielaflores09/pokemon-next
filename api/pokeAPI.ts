@@ -3,6 +3,6 @@ const pokeApi = async (url = "/", method = "GET") =>
     method,
   })
     .then((res) => res.json())
-    .catch((error) => console.log(error));
+    .catch((error) => console.log('error pokeApi', error));
 
 export default pokeApi;
